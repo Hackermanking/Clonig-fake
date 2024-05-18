@@ -1,45 +1,73 @@
 from fbchat import Client
 from fbchat.models import *
 import getpass
+from colorama import Fore, Style, init
+
+# Initialisation de colorama
+init(autoreset=True)
+
+# Logo ASCII et informations avec couleurs
+logo = f"""
+{Fore.CYAN}  _____       _        _     _           
+{Fore.CYAN} |  ___|_   _| |_ __ _| |__ | | ___  ___ 
+{Fore.CYAN} | |_  | | | | __/ _` | '_ \| |/ _ \/ __|
+{Fore.CYAN} |  _| | |_| | || (_| | |_) | |  __/\__ \\
+{Fore.CYAN} |_|    \__,_|\__\__,_|_.__/|_|\___||___/
+
+"""
+print(logo)
+print(f"{Fore.GREEN}Créé par : Votre Nom")
+print(f"{Fore.GREEN}Version : 1.0.0")
+print(f"{Fore.GREEN}Description : Un outil interactif pour accéder à Facebook via Termux.\n")
 
 # Demande les informations de connexion à l'utilisateur
-username = input("Entrez votre numéro de téléphone ou adresse e-mail : ")
-password = getpass.getpass("Entrez votre mot de passe : ")
+username = input(f"{Fore.YELLOW}Entrez votre numéro de téléphone ou adresse e-mail : ")
+password = getpass.getpass(f"{Fore.YELLOW}Entrez votre mot de passe : ")
 
 # Connexion à Facebook
 class CustomClient(Client):
     def onMessage(self, author_id, message_object, thread_id, thread_type, **kwargs):
-        print("Message reçu de {}: {}".format(author_id, message_object.text))
+        print(f"{Fore.MAGENTA}Message reçu de {author_id}: {message_object.text}")
 
-client = CustomClient(username, password)
-print("Connecté avec succès à Facebook.")
+try:
+    client = CustomClient(username, password)
+    print(f"{Fore.GREEN}Connecté avec succès à Facebook.")
+except Exception as e:
+    print(f"{Fore.RED}Erreur lors de la connexion à Facebook:", e)
+    exit()
 
 def afficher_messages():
-    messages = client.fetchThreadMessages(thread_id=client.uid, limit=10)
-    messages.reverse()  # Pour afficher du plus ancien au plus récent
-    for message in messages:
-        auteur = client.fetchUserInfo(message.author)[message.author]
-        print("{} a dit : {}".format(auteur.name, message.text))
+    try:
+        messages = client.fetchThreadMessages(thread_id=client.uid, limit=10)
+        messages.reverse()  # Pour afficher du plus ancien au plus récent
+        for message in messages:
+            auteur = client.fetchUserInfo(message.author)[message.author]
+            print(f"{Fore.CYAN}{auteur.name} a dit : {message.text}")
+    except Exception as e:
+        print(f"{Fore.RED}Erreur lors de la récupération des messages:", e)
 
 def afficher_profil():
-    profil = client.fetchProfile(client.uid)
-    print("Nom: ", profil.name)
-    print("Email: ", profil.email)
-    print("Numéro de téléphone: ", profil.phone)
-    print("Adresse: ", profil.address)
+    try:
+        profil = client.fetchProfile(client.uid)
+        print(f"{Fore.CYAN}Nom: {profil.name}")
+        print(f"{Fore.CYAN}Email: {profil.email}")
+        print(f"{Fore.CYAN}Numéro de téléphone: {profil.phone}")
+        print(f"{Fore.CYAN}Adresse: {profil.address}")
+    except Exception as e:
+        print(f"{Fore.RED}Erreur lors de la récupération du profil:", e)
 
 def afficher_parametres():
-    print("Les paramètres du compte ne sont pas encore implémentés.")
+    print(f"{Fore.YELLOW}Les paramètres du compte ne sont pas encore implémentés.")
 
 # Menu interactif
 while True:
-    print("\nChoisissez une option :")
-    print("1. Voir les messages")
-    print("2. Paramètres du compte")
-    print("3. Profil")
-    print("4. Quitter")
+    print(f"\n{Fore.BLUE}Choisissez une option :")
+    print(f"{Fore.BLUE}1. Voir les messages")
+    print(f"{Fore.BLUE}2. Paramètres du compte")
+    print(f"{Fore.BLUE}3. Profil")
+    print(f"{Fore.BLUE}4. Quitter")
 
-    choix = input("Entrez votre choix : ")
+    choix = input(f"{Fore.YELLOW}Entrez votre choix : ")
 
     if choix == '1':
         afficher_messages()
@@ -48,8 +76,8 @@ while True:
     elif choix == '3':
         afficher_profil()
     elif choix == '4':
-        print("Déconnexion...")
+        print(f"{Fore.GREEN}Déconnexion...")
         client.logout()
         break
     else:
-        print("Choix invalide. Veuillez réessayer.")
+        print(f"{Fore.RED}Choix invalide. Veuillez réessayer.")
